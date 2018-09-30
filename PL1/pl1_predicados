@@ -1,0 +1,117 @@
+% FACTOS
+
+continente(africa).
+continente(america).
+continente(asia).
+continente(europa).
+continente(oceania).
+continente(teste).
+
+pais(portugal, europa, 10).   %EUROPA
+pais(espanha, europa, 40).
+pais(franca, europa, 50).
+pais(alemanha,europa,40).
+
+pais(usa, america, 60).       %AMERICA
+pais(mexico, america, 50).
+
+pais(india, asia, 80).        %ASIA
+pais(china, asia, 100).
+
+pais(australia, oceania, 10).  %OCEANIA
+
+pais(angola, africa, 40).     %AFRICA
+pais(congo, africa, 80).
+
+fronteira(portugal, espanha).
+fronteira(franca, espanha).
+fronteira(alemanha,franca).
+
+fronteira(usa, mexico).
+
+fronteira(india, china).
+
+fronteira(congo,  angola).
+
+% PREDICADOS
+
+% true -> países fazem fronteira
+vizinho(U,D):-
+    pais(U,_,_),
+    pais(D,_,_),
+    fronteira(U,D);fronteira(D,U).
+
+
+% Encontra continentes que não tem paises (BC)
+contSemPaises(C):-continente(C),not(pais(_,C,_)).
+
+
+% Encontra os países sem fronteiras definidas na BC.
+semVizinhos(L):-pais(L,_,_), not(vizinho(L,_)).
+
+% É possível chegar de P1 a P2, diretamente ou atravessando unicamente
+% um outro país.
+chegoLaFacil(U,D):- vizinho(U,D);(vizinho(U,B), vizinho(B,D)).
+
+
+% PREDICADOS RECURSIVOS
+
+% potencia(X,N,P), onde X é a base
+%                       N é a potencia
+%                       P é o resultado
+%
+% STATUS: WORKING
+potencia(X,N,P):-N<0, calPotencia(X,-N,P1), !,P is 1/P1.
+potencia(X,N,P):-N>=0, calPotencia(X,N,P).
+calPotencia(_,0,1):-!.
+calPotencia(X,N,P):- N1 is N-1,!, calPotencia(X,N1,P1), P is X*P1.
+
+
+% fatorial(N,R), onde N é um numero
+%                     R é o resultado
+%
+% STATUS: WORKING
+fatorial(0,X):-X=1,!.
+fatorial(N,R):- N1 is N-1, fatorial(N1, R1), R is R1*N.
+
+% somatorio(J,K,S), onde J,K pertencem a N ^ J>=K
+%                        S é o resultado
+%
+% STATUS: WORKING
+somatorio(J,K,S):- J==K,S is K, !.
+somatorio(J,K,S):- J>K, S is 0, !.
+somatorio(J,K,S):- J<K, J1 is J+1, K1 is K-1, somatorio(J1, K1, S1), S is J+K+S1.
+
+
+%startDiv(N,D,R,Q), onde N é o Dividento
+%                   D é o Divisor
+%                   R é o resto
+%                   Q é o quociente
+%
+% STATUS: WORKING ( +-)
+startDiv(N,D,R,Q):-  div(N,D,_,_, R, Q).
+div(N,D,R,Q,R2,Q2):- var(R),var(Q),R1 is N, Q1 is 0, div(N,D,R1,Q1,R2,Q2).
+div(N,D,R,Q,R2,Q2):- nonvar(R),R>=D, R1 is R-D, Q1 is Q+1, div(N,D,R1,Q1,R2,Q2).
+div(_,D,R,Q,R2,Q2):- nonvar(R),R<D, R2 is R, Q2 is Q.
+
+
+%prime(N), onde N é um numero inteiro.
+prime(N):- K is N-1, isPrime(N,K).
+isPrime(N,K):- N mod K =\= 0, K1 is K-1, isPrime(N,K1).
+isPrime(N,K):- N mod K =:= 0, K==1, write("IS PRIME"), true.
+isPrime(N,K):- N mod K =:= 0, write("NOT PRIME"), false.
+
+
+% mdc(A,B,R), onde B>=A ^ [A,E] pertence a N
+%             R é o resultado(mdc)
+%             STATUS: WORKING 10/10
+
+calcMDC(A,B,R):- A=<B, C is A, mdc(A,B,R,C).
+calcMDC(A,B,R):- A>B, C is B, mdc(B,A,R,C).
+
+mdc(A,B,R,C):- (B mod A) =:= 0,(C mod A) =:= 0,R is A, !.
+mdc(A,B,R,C):- ((B mod A) =\= 0;(C mod A) =\= 0 ),A > 1, A1 is A-1,mdc(A1,B,R,C).
+mdc(A,B,R,C):- ((B mod A) =\= 0;(C mod A) =\= 0) ,A = 1, R is 1, !.
+
+
+
